@@ -1,17 +1,18 @@
-from awsMQTT import awsMQTT
+from awsMQTT import AWSconnect
 import time
 
 # init
-awsMQTTClient = awsMQTT.create("self")
+awsMQTTClient = AWSconnect("testSub")
 awsMQTTClient.connect()
 print("AWS Client connected")
 
 
 def gpioSetter(client, userdata, message):
     print("SET DEVICE:", message.topic, "TO", message.payload)
-    print("--------------\n\n")
+    print("--------------")
 
-awsMQTTClient.subscribe("piCar/nodeShortCode-1/#", 0, gpioSetter)
+
+awsMQTTClient.subscribe("piCar/nodeShortCode-1/#", 1, gpioSetter)
 
 while True:
-    i = 1
+    time.sleep(15)

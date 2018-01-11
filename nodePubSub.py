@@ -1,12 +1,12 @@
 from numpy.core.defchararray import rfind
-from awsMQTT import awsMQTT
+from awsMQTT import AWSconnect
 from distanceReader import DistanceCollector
 from config import piCarMovementGPIO, piCarDistanceGPIO
 import RPi.GPIO as GPIO
 import time
 
 # init
-awsMQTTClient = awsMQTT.create("self")
+awsMQTTClient = AWSconnect("piCarNode")
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(piCarMovementGPIO.GPIO_MOVE, GPIO.OUT)
 GPIO.setup(piCarMovementGPIO.GPIO_FWD, GPIO.OUT)
@@ -38,11 +38,8 @@ GPIO.output(piCarMovementGPIO.GPIO_LEFT, 1)
 
 
 def setGPIO(gpio, value):
-    print(gpio, value)
-    if (value == "b'ON'"):
-        GPIO.output(gpio, 0)
-    elif (value == "b'OFF'"):
-        GPIO.output(gpio, 1)
+    print("GPIO:", gpio, "VALUE:", value.decode('utf-8'))
+    GPIO.output(int(gpio), int(value.decode('utf-8')))
 
 
 def readGPIO(gpio):
@@ -51,8 +48,8 @@ def readGPIO(gpio):
 
 # MQTT message callback: SET GPIO
 def gpioSetter(client, userdata, message):
-    print("SET DEVICE:", message.topic, "TO", message.payload)
-    print("--------------\n\n")
+    # print("SET DEVICE:", message.topic, "TO", message.payload)
+    # print("--------------")
     setGPIO(message.topic[rfind(message.topic, "-") + 1:], message.payload)
 
 
@@ -91,7 +88,7 @@ print("AWS IoT Client is connected.")
 # listener
 awsMQTTClient.subscribe("piCar/nodeShortCode-1/#", 1, gpioSetter)
 while True:
-    i = 1
+    time.sleep(10)
     # dist = distanceFront.readDistance()
     # if (dist < 20 and dist > 10):
     #     awsMQTTClient.publish("piCar/node1/dist", "{'Distance': " + str(round(dist, 2)) + "}", 0)
